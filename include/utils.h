@@ -4,5 +4,6 @@
 #include <Windows.h>
 
 void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileContents);
+void SaveFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR* initialFileName, WCHAR** ppFileContents);
 
 #endif // __UTILS_H

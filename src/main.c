@@ -126,7 +126,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 ANSI_CHARSET,
                 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
                 DEFAULT_QUALITY, FF_MODERN,
-                L"Lucida Console"
+                L"Consolas"
             );
 
             SendMessage(ghEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
@@ -167,6 +167,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                         SendMessage(ghEdit, WM_SETTEXT, 0, (LPARAM)pFileContent);
                         HeapFree(GetProcessHeap(), 0, pFileContent);
                     }
+                    break;
+                }
+                case ID_FILE_SAVE:
+                {
+                    int textLength = SendMessage(ghEdit, WM_GETTEXTLENGTH, 0, 0);
+                    WCHAR* fileContents = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (SIZE_T)((textLength + 1) * sizeof(WCHAR)));
+                    SendMessage(ghEdit, WM_GETTEXT, textLength + 1, (LPARAM)fileContents);
+
+                    SaveFileDialog(hwnd, L"All Files\0*.*\0Text Documents (*.txt)\0*.txt\0", NULL, L"example.txt", &fileContents);
+
+                    HeapFree(GetProcessHeap(), 0, fileContents);
                     break;
                 }
                 case ID_FORMAT_FONT:
