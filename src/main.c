@@ -46,6 +46,15 @@ LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
         return 1;
     }
 
+    if (nCode == HC_ACTION && wParam == 0x53 && GetAsyncKeyState(VK_CONTROL) < 0)
+    {
+        if (GetAsyncKeyState(0x53) >= 0)
+            return CallNextHookEx(NULL, nCode, wParam, lParam);
+
+        PostMessage(ghWindow, WM_COMMAND, ID_FILE_SAVE, 0);
+        return 1;
+    }
+
     if (nCode == HC_ACTION && wParam == 0x2B && GetAsyncKeyState(VK_CONTROL) < 0)
     {
         int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
@@ -191,7 +200,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     cf.lStructSize = sizeof(CHOOSEFONTW);
                     cf.hwndOwner = hwnd;
                     cf.lpLogFont = &lf;
-                    cf.Flags = CF_SCREENFONTS | CF_EFFECTS;
+                    cf.Flags = CF_SCREENFONTS;
 
                     HFONT hOldFont = (HFONT)SendMessage(ghEdit, WM_GETFONT, 0, 0);
                     
