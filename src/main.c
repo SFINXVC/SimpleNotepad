@@ -11,12 +11,13 @@
 #include <CommCtrl.h>
 
 #include "exception.h"
+#include "dlgabout.h"
 #include "config.h"
 #include "utils.h"
 #include "ids.h"
 
-#define DEFAULT_WINDOW_WIDTH 800
-#define DEFAULT_WINDOW_HEIGHT 600
+#define DEFAULT_WINDOW_WIDTH 1080
+#define DEFAULT_WINDOW_HEIGHT 680
 
 #define CLASS_NAMEW L"SimpleNotepad"
 #define CLASS_NAME TEXT("SimpleNotepad")
@@ -228,7 +229,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 case ID_HELP_REPO:
                 {
-                    int result = MessageBox(hwnd, "Open the SimpleNotepad github repository? (this will open a link to the browser)", "View Repository", MB_YESNO | MB_ICONQUESTION);
+                    int result = MessageBox(hwnd, "Go to the SimpleNotepad's GitHub repository?", "View Repository", MB_YESNO | MB_ICONQUESTION);
                     
                     if (result == IDYES)
                         ShellExecuteW(NULL, L"open", sgwRepoLink, NULL, NULL, SW_SHOW);
@@ -237,7 +238,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 case ID_HELP_ABOUT:
                 {
-                    MessageBox(hwnd, "Simple Notepad - Made by SFINXV <3", "About", MB_OK | MB_ICONINFORMATION);
+                    HWND dlgabout = ShowAboutDialog(NULL, hwnd);
+
+                    if (dlgabout == NULL)
+                        MessageBox(NULL, "Failed to show AboutDialogBox (handle returned NULL)", "Error", MB_OK | MB_ICONERROR);
+
+                    ShowWindow(dlgabout, SW_SHOW);
                     break;
                 }
             }

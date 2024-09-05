@@ -2,6 +2,8 @@
 #define __IDS_H
 
 #define ID_APP_ICO 100
+#define ID_APP_BNR 101
+#define ID_APP_ICO_BIG 102
 
 #define ID_FILE_NEW 1
 #define ID_FILE_OPEN 2

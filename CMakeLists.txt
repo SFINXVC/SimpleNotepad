@@ -15,6 +15,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 add_executable(${PROJECT_NAME} WIN32 
     src/main.c
     src/utils.c
+    src/dlgabout.c
     src/exception.c
 
     res/resources.rc
