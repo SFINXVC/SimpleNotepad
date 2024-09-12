@@ -115,12 +115,14 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         hAboutWindow, (HMENU)1, NULL, NULL
     );
 
-    HBITMAP hBitmap1 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCE(ID_APP_BNR), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
-
-    HBITMAP hBitmap2 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCE(ID_APP_ICO_BIG), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
+    HBITMAP hBitmap1 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCEA(ID_APP_BNR), IMAGE_BITMAP, 0, 0, LR_SHARED);
+    HBITMAP hBitmap2 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCEA(ID_APP_ICO_BIG), IMAGE_BITMAP, 0, 0, LR_SHARED);
     
-    if (!(hBitmap1 || hBitmap2))
-        ShowLastError(L"Failed to load bitmap image");
+    if (hBitmap1 == NULL)
+        ShowLastError(L"Failed to load ID_APP_BNR bitmap");
+
+    if (hBitmap2 == NULL)
+        ShowLastError(L"Failed to load ID_APP_ICO_BIG bitmap");
 
     SendMessage(hPicture1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap1);
     SendMessage(hPicture2, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap2);

@@ -238,7 +238,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 case ID_HELP_ABOUT:
                 {
-                    HWND dlgabout = ShowAboutDialog(NULL, hwnd);
+                    HINSTANCE hInstance = (HINSTANCE)GetWindowLongPtr(hwnd, GWLP_HINSTANCE);
+
+                    HWND dlgabout = ShowAboutDialog(hInstance, hwnd);
 
                     if (dlgabout == NULL)
                         MessageBox(NULL, "Failed to show AboutDialogBox (handle returned NULL)", "Error", MB_OK | MB_ICONERROR);
