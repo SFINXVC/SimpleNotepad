@@ -174,7 +174,13 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     
                     if (pFileContent != NULL)
                     {
-                        SendMessage(ghEdit, WM_SETTEXT, 0, (LPARAM)pFileContent);
+                        // MessageBoxW(hwnd, pFileContent, L"File Content", MB_OK);
+                        SETTEXTEX stx;
+                        ZeroMemory(&stx, sizeof(SETTEXTEX));
+
+                        stx.flags = ST_DEFAULT;
+                        stx.codepage = 1200;
+                        SendMessage(ghEdit, EM_SETTEXTEX, (WPARAM)&stx, (LPARAM)pFileContent);
                         HeapFree(GetProcessHeap(), 0, pFileContent);
                     }
                     break;
