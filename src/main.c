@@ -170,11 +170,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 case ID_FILE_OPEN:
                 {
                     WCHAR* pFileContent = NULL;
-                    OpenFileDialog(hwnd, L"All Files\0*.*\0Text Documents (*.txt)\0*.txt\0", L"", &pFileContent);
-                    
+                    WCHAR* pFileName = NULL;
+                    OpenFileDialog(hwnd, L"All Files\0*.*\0Text Documents (*.txt)\0*.txt\0", L"", &pFileContent, &pFileName);
+
                     if (pFileContent != NULL)
                     {
-                        // MessageBoxW(hwnd, pFileContent, L"File Content", MB_OK);
                         SETTEXTEX stx;
                         ZeroMemory(&stx, sizeof(SETTEXTEX));
 
@@ -238,7 +238,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     int result = MessageBox(hwnd, "Go to the SimpleNotepad's GitHub repository?", "View Repository", MB_YESNO | MB_ICONQUESTION);
                     
                     if (result == IDYES)
-                        ShellExecuteW(NULL, L"open", sgwRepoLink, NULL, NULL, SW_SHOW);
+                        ShellExecuteW(NULL, L"open", g_wszRepoLink, NULL, NULL, SW_SHOW);
                     
                     break;
                 }

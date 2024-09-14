@@ -1,9 +1,11 @@
 #include "dlgabout.h"
 #include "exception.h"
 
+#include <libloaderapi.h>
 #include <windef.h>
 #include <wingdi.h>
 #include <winuser.h>
+#include <Windows.h>
 
 #include "ids.h"
 
@@ -115,19 +117,22 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         hAboutWindow, (HMENU)1, NULL, NULL
     );
 
-    HBITMAP hBitmap1 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCEA(ID_APP_BNR), IMAGE_BITMAP, 0, 0, LR_SHARED);
-    HBITMAP hBitmap2 = (HBITMAP)LoadImage(hInstance, MAKEINTRESOURCEA(ID_APP_ICO_BIG), IMAGE_BITMAP, 0, 0, LR_SHARED);
+    // HBITMAP hBitmap1 = LoadBitmapA(hInstance, MAKEINTRESOURCE(HIWORD(ID_APP_BNR)));
+    // HBITMAP hBitmap2 = LoadBitmapA(hInstance, MAKEINTRESOURCE(HIWORD(ID_APP_ICO_BIG)));
     
-    if (hBitmap1 == NULL)
-        ShowLastError(L"Failed to load ID_APP_BNR bitmap");
+    // if (hBitmap1 == NULL)
+    //     ShowLastError(L"Failed to load ID_APP_BNR bitmap");
 
-    if (hBitmap2 == NULL)
+    // if (hBitmap2 == NULL)
+    //     ShowLastError(L"Failed to load ID_APP_ICO_BIG bitmap");
+
+    HBITMAP hBitmap = (HBITMAP)LoadImageA(GetModuleHandle(NULL), MAKEINTRESOURCE(102), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
+
+    if (hBitmap == NULL)
         ShowLastError(L"Failed to load ID_APP_ICO_BIG bitmap");
 
-    SendMessage(hPicture1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap1);
-    SendMessage(hPicture2, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap2);
-    SendMessage(hPicture1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap1);
-    SendMessage(hPicture2, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap2);
+    // SendMessage(hPicture1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap1);
+    // SendMessage(hPicture2, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap2);
     SendMessage(hText1, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hText2, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hOkBtn, WM_SETFONT, (WPARAM)hFont, TRUE);

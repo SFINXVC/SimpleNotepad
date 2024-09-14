@@ -21,5 +21,5 @@ add_executable(${PROJECT_NAME} WIN32
     res/resources.rc
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE comctl32.lib dwmapi.lib uxtheme.lib)
+target_link_libraries(${PROJECT_NAME} PRIVATE user32.lib comctl32.lib dwmapi.lib shlwapi.lib uxtheme.lib)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

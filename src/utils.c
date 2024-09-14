@@ -7,8 +7,10 @@
 #include <handleapi.h>
 #include <heapapi.h>
 #include <stringapiset.h>
+#include <wchar.h>
 #include <winnt.h>
 #include <winternl.h>
+#include <Shlwapi.h>
 
 int DetectFileEncoding(const BYTE* buffer, DWORD bufferSize)
 {
@@ -34,7 +36,7 @@ int DetectFileEncoding(const BYTE* buffer, DWORD bufferSize)
     return CP_ACP;
 }
 
-void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileContents)
+void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileContents, WCHAR** ppFileName)
 {
     OPENFILENAMEW ofn;
     ZeroMemory(&ofn, sizeof(ofn));
@@ -115,6 +117,8 @@ void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileC
         }
     }
 
+    *ppFileName = PathFindFileNameW(lpFilePath);
+
     // clean up
     HeapFree(GetProcessHeap(), 0, lpFileBuffer);  // Clean up buffer
     HeapFree(GetProcessHeap(), 0, lpFilePath);    // Clean up file path
@@ -123,45 +127,96 @@ void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileC
 void SaveFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR* initialFileName, WCHAR** ppFileContents)
 {
     OPENFILENAMEW ofn;
-    ZeroMemory(&ofn, sizeof(OPENFILENAMEW));
+    ZeroMemory(&ofn, sizeof(ofn));
 
-    WCHAR* szFile = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, 1024 * sizeof(WCHAR));
-    if (szFile == NULL)
+    LPWSTR lpFilePath = (LPWSTR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, MAX_PATH * sizeof(WCHAR));
+    if (lpFilePath == NULL)
     {
         ShowLastError(L"Failed to allocate string for SaveFileDialog");
         return;
     }
 
-    if (initialFileName != NULL)
-    {
-        wcsncpy_s(szFile, 1024, initialFileName, _TRUNCATE);
-    }
+    if (initialFileName != NULL && wcslen(initialFileName) < MAX_PATH)
+        wcscpy_s(lpFilePath, MAX_PATH, initialFileName);
 
-    ofn.lStructSize = sizeof(OPENFILENAME);
+    ofn.lStructSize = sizeof(OPENFILENAMEW);
     ofn.hwndOwner = hwnd;
-    ofn.lpstrFile = szFile;
-    ofn.nMaxFile = 1024;
+    ofn.lpstrFile = lpFilePath;
+    ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFilter = filter;
     ofn.nFilterIndex = 1;
-    ofn.lpstrFileTitle = NULL;
-    ofn.nMaxFileTitle = 0;
     ofn.lpstrInitialDir = initialDir;
     ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
-    if (GetSaveFileNameW(&ofn) == TRUE)
+    if (!GetSaveFileNameW(&ofn))
     {
-        HANDLE hFile = CreateFileW(ofn.lpstrFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_FLAG_WRITE_THROUGH, NULL);
+        HeapFree(GetProcessHeap(), 0, lpFilePath);
+        return;
+    }
 
-        if (hFile != INVALID_HANDLE_VALUE)
+    if (ppFileContents == NULL || *ppFileContents == NULL)
+    {
+        HeapFree(GetProcessHeap(), 0, lpFilePath);
+        ShowLastError(L"No content to save");
+        return;
+    }
+
+    // determine which encoding to use
+    // by detecting if theres some freaky unicode characters
+    BOOL isUnicode = FALSE;
+    for (WCHAR* p = *ppFileContents; *p != L'\0'; p++)
+    {
+        if (*p > 127)
         {
-            DWORD dwBytesWritten = 0;
-            BYTE bom[2] = { 0xFF, 0xFE };
-            WriteFile(hFile, bom, 2, &dwBytesWritten, NULL);
-            WriteFile(hFile, *ppFileContents, wcslen(*ppFileContents) * sizeof(WCHAR), &dwBytesWritten, NULL);
-
-            CloseHandle(hFile);
+            isUnicode = TRUE;
+            break;
         }
     }
 
-    HeapFree(GetProcessHeap(), 0, szFile);
+    HANDLE hFile = CreateFileW(lpFilePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (hFile == INVALID_HANDLE_VALUE)
+    {
+        HeapFree(GetProcessHeap(), 0, lpFilePath);
+        ShowLastError(L"Failed to create file");
+        return;
+    }
+
+    DWORD dwBytesWritten = 0;
+
+    if (isUnicode)
+    {
+        DWORD dwFileContentSize = (DWORD)(wcslen(*ppFileContents) * sizeof(WCHAR));
+        if (!WriteFile(hFile, *ppFileContents, dwFileContentSize, &dwBytesWritten, NULL) || dwBytesWritten != dwFileContentSize)
+        {
+            CloseHandle(hFile);
+            HeapFree(GetProcessHeap(), 0, lpFilePath);
+            ShowLastError(L"Failed to write Unicode content to file");
+            return;
+        }
+    }
+    else
+    {
+        int utf8Size = WideCharToMultiByte(CP_UTF8, 0, *ppFileContents, -1, NULL, 0, NULL, NULL);
+        if (utf8Size > 0)
+        {
+            LPSTR lpUtf8Content = (LPSTR)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, utf8Size);
+            if (lpUtf8Content)
+            {
+                WideCharToMultiByte(CP_UTF8, 0, *ppFileContents, -1, lpUtf8Content, utf8Size, NULL, NULL);
+                if (!WriteFile(hFile, lpUtf8Content, utf8Size - 1, &dwBytesWritten, NULL) || dwBytesWritten != (DWORD)(utf8Size - 1))
+                {
+                    HeapFree(GetProcessHeap(), 0, lpUtf8Content);
+                    CloseHandle(hFile);
+                    HeapFree(GetProcessHeap(), 0, lpFilePath);
+                    ShowLastError(L"Failed to write UTF-8 content to file");
+                    return;
+                }
+                HeapFree(GetProcessHeap(), 0, lpUtf8Content);
+            }
+        }
+    }
+
+    // clean up
+    CloseHandle(hFile);
+    HeapFree(GetProcessHeap(), 0, lpFilePath);
 }

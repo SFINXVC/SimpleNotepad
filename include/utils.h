@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 int DetectFileEncoding(const BYTE* buffer, DWORD bufferSize);
-void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileContents);
+void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileContents, WCHAR** ppFileName);
 void SaveFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR* initialFileName, WCHAR** ppFileContents);
 
 #endif // __UTILS_H

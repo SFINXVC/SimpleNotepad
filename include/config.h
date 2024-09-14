@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
-static const WCHAR* sgwRepoLink = L"https://github.com/SFINXVC/SimpleNotepad";
+static const WCHAR* g_wszRepoLink = L"https://github.com/SFINXVC/SimpleNotepad";
+static const WCHAR* g_wszFileName = L"Untitled";
 
 #endif // __CONFIG_H
