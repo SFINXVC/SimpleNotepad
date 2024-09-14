@@ -11,13 +11,15 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install CMake
-        uses: lukka/get-cmake@v3
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.21.3'
 
       - name: Configure with CMake
         run: cmake -S . -B build -G "Visual Studio 16 2019"
