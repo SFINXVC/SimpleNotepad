@@ -1,7 +1,3 @@
-Here's a fixed version of the grammar:
-
----
-
 # SimpleNotepad: A Good Old Windows Notepad Clone
 
 [![Build Status](https://github.com/SFINXVC/SimpleNotepad/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/SFINXVC/SimpleNotepad/actions)  
