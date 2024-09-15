@@ -129,7 +129,6 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         hAboutWindow, (HMENU)1, NULL, NULL
     );
 
-
     SendMessage(hText1, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hText2, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hOkBtn, WM_SETFONT, (WPARAM)hFont, TRUE);

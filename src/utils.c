@@ -303,6 +303,9 @@ void DrawImage(HDC hdc, HBITMAP hBitmap, int x, int y, int width, int height)
         lNewWidth = (LONG)(lNewHeight * fRatio);
     }
 
+    LONG offsetX = (width - lNewWidth) / 2;
+    LONG offsetY = (height - lNewHeight) / 2;
+
     StretchBlt(hdc, x, y, lNewWidth, lNewHeight, hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
 
     SelectObject(hdcMem, oldBitmap);
