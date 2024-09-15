@@ -8,6 +8,10 @@
 #include <Windows.h>
 
 #include "ids.h"
+#include "utils.h"
+
+static HBITMAP hImage1 = NULL;
+static HBITMAP hImage2 = NULL;
 
 LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -16,6 +20,17 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
         case WM_CLOSE:
         {
             DestroyWindow(hwnd);
+            break;
+        }
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+
+            DrawImage(hdc, hImage1, 12, 12, 428, 103);
+            DrawImage(hdc, hImage2, 12, 138, 50, 50);
+
+            EndPaint(hwnd, &ps);
             break;
         }
         case WM_COMMAND:
@@ -86,12 +101,14 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         VARIABLE_PITCH, L"Segoe UI"
     );
 
+    hImage1 = LoadPngFromResource(hInstance, hAboutWindow, ID_APP_BNR);
+    hImage2 = LoadPngFromResource(hInstance, hAboutWindow, ID_APP_ICO_BIG);
+
     HWND hSeparator = CreateWindowW(L"STATIC", NULL, 
         WS_CHILD | WS_VISIBLE | SS_ETCHEDHORZ, 
         12, 125, 428, 2, 
         hAboutWindow, NULL, hInstance, NULL
     );
-
 
     HWND hText1 = CreateWindowExW(
         WS_EX_TRANSPARENT, L"STATIC", L"SimpleNotepad\n© 2024 SFINXV. All rights reserved.",
@@ -113,24 +130,6 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
     );
 
 
-    // i just don't care with the bitmaps now.
-    
-    // HBITMAP hBitmap1 = LoadBitmapA(hInstance, MAKEINTRESOURCE(HIWORD(ID_APP_BNR)));
-    // HBITMAP hBitmap2 = LoadBitmapA(hInstance, MAKEINTRESOURCE(HIWORD(ID_APP_ICO_BIG)));
-    
-    // if (hBitmap1 == NULL)
-    //     ShowLastError(L"Failed to load ID_APP_BNR bitmap");
-
-    // if (hBitmap2 == NULL)
-    //     ShowLastError(L"Failed to load ID_APP_ICO_BIG bitmap");
-
-    // HBITMAP hBitmap = (HBITMAP)LoadImageA(GetModuleHandle(NULL), MAKEINTRESOURCE(102), IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION);
-
-    // if (hBitmap == NULL)
-    //     ShowLastError(L"Failed to load ID_APP_ICO_BIG bitmap");
-
-    // SendMessage(hPicture1, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap1);
-    // SendMessage(hPicture2, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap2);
     SendMessage(hText1, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hText2, WM_SETFONT, (WPARAM)hFont, TRUE);
     SendMessage(hOkBtn, WM_SETFONT, (WPARAM)hFont, TRUE);

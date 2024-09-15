@@ -6,11 +6,18 @@
 #include <fileapi.h>
 #include <handleapi.h>
 #include <heapapi.h>
+#include <libloaderapi.h>
+#include <minwindef.h>
 #include <stringapiset.h>
 #include <wchar.h>
+#include <windef.h>
+#include <wingdi.h>
 #include <winnt.h>
 #include <winternl.h>
 #include <Shlwapi.h>
+#include <winuser.h>
+
+#include <png.h>
 
 int DetectFileEncoding(const BYTE* buffer, DWORD bufferSize)
 {
@@ -219,4 +226,85 @@ void SaveFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR* initialF
     // clean up
     CloseHandle(hFile);
     HeapFree(GetProcessHeap(), 0, lpFilePath);
+}
+
+HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
+{
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(nResId), "PNG");
+    if (hRes == NULL)
+        return NULL;
+
+    HGLOBAL hMem = LoadResource(hInstance, hRes);
+    if (hMem == NULL)
+        return NULL;
+
+    DWORD dwPngSize = SizeofResource(hInstance, hRes);
+    LPVOID lpPngData = LockResource(hMem);
+
+    if (lpPngData == NULL)
+        return NULL;
+
+    png_image image;
+    ZeroMemory(&image, sizeof(png_image));
+
+    image.version = PNG_IMAGE_VERSION;
+
+    if (png_image_begin_read_from_memory(&image, lpPngData, dwPngSize) == 0)
+    {
+        MessageBoxA(hwnd, "Failed to read PNG file from memory", "Error", MB_OK | MB_ICONERROR);
+        return NULL;
+    }
+
+    image.format = PNG_FORMAT_RGBA;
+
+    png_bytep buffer = (png_bytep)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, PNG_IMAGE_SIZE(image));
+    if (buffer == NULL)
+    {
+        png_image_free(&image);
+        MessageBoxA(hwnd, "Failed to allocate a buffer for reading PNG file!", "Error", MB_OK | MB_ICONERROR);
+        return NULL;
+    }
+
+    if (png_image_finish_read(&image, NULL, buffer, 0, NULL) == 0)
+    {
+        png_image_free(&image);
+        HeapFree(GetProcessHeap(), 0, buffer);
+        MessageBoxA(hwnd, "Failed to parse PNG file!", "Error", MB_OK | MB_ICONERROR);
+        return NULL;
+    }
+
+    HBITMAP hBitmap = CreateBitmap(image.width, image.height, 1, 32, buffer);
+
+    HeapFree(GetProcessHeap(), 0, buffer);
+    png_image_free(&image);
+
+    return hBitmap;
+}
+
+void DrawImage(HDC hdc, HBITMAP hBitmap, int x, int y, int width, int height)
+{
+    if (hBitmap == NULL)
+        return;
+
+    HDC hdcMem = CreateCompatibleDC(hdc);
+    HGDIOBJ oldBitmap = SelectObject(hdcMem, hBitmap);
+
+    BITMAP bitmap;
+    GetObject(hBitmap, sizeof(BITMAP), &bitmap);
+
+    // calculate aspect ratio to fit the image to the current size
+    FLOAT fRatio = (FLOAT)bitmap.bmWidth / bitmap.bmHeight;
+    LONG lNewWidth = width;
+    LONG lNewHeight = (LONG)(lNewWidth / fRatio);
+
+    if (lNewHeight > height)
+    {
+        lNewHeight = height;
+        lNewWidth = (LONG)(lNewHeight * fRatio);
+    }
+
+    StretchBlt(hdc, x, y, lNewWidth, lNewHeight, hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+
+    SelectObject(hdcMem, oldBitmap);
+    DeleteDC(hdcMem);
 }

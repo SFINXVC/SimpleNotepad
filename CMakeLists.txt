@@ -26,9 +26,9 @@ add_executable(${PROJECT_NAME} WIN32
 message(STATUS "Fetching zlib...")
 
 FetchContent_Declare(
-        zlib
-        GIT_REPOSITORY https://github.com/madler/zlib/
-        GIT_TAG        v1.3.1
+    zlib
+    GIT_REPOSITORY https://github.com/madler/zlib/
+    GIT_TAG        v1.3.1
 )
 
 set(ZLIB_BUILD_EXAMPLES OFF)
@@ -56,9 +56,9 @@ FetchContent_Declare(
 )
 
 set(PNG_TESTS OFF)
-set(PNG_STATIC ON)
 set(PNG_SHARED OFF)
 set(PNG_TOOLS OFF)
+set(PNG_STATIC ON)
 
 FetchContent_MakeAvailable(libpng)
 
@@ -81,7 +81,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     uxtheme.lib
 
     zlib
-    # png
+    png_static
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
