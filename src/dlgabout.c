@@ -101,8 +101,8 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         VARIABLE_PITCH, L"Segoe UI"
     );
 
-    hImage1 = LoadPngFromResource(hInstance, hAboutWindow, ID_APP_BNR);
-    hImage2 = LoadPngFromResource(hInstance, hAboutWindow, ID_APP_ICO_BIG);
+    hImage1 = LoadPngFromResource(hInstance, ID_APP_BNR);
+    hImage2 = LoadPngFromResource(hInstance, ID_APP_ICO_BIG);
 
     HWND hSeparator = CreateWindowW(L"STATIC", NULL, 
         WS_CHILD | WS_VISIBLE | SS_ETCHEDHORZ, 

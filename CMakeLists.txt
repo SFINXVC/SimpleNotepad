@@ -74,13 +74,14 @@ include_directories("${PNG_INCLUDE_DIR}")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     user32.lib 
+    Msimg32.lib
     gdiplus.lib 
     comctl32.lib 
     dwmapi.lib 
     shlwapi.lib 
     uxtheme.lib
 
-    zlib
+    zlibstatic
     png_static
 )
 

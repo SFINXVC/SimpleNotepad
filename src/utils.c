@@ -228,7 +228,7 @@ void SaveFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR* initialF
     HeapFree(GetProcessHeap(), 0, lpFilePath);
 }
 
-HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
+HBITMAP LoadPngFromResource(HINSTANCE hInstance, int nResId)
 {
     HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(nResId), "PNG");
     if (hRes == NULL)
@@ -239,7 +239,7 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
         return NULL;
 
     DWORD dwPngSize = SizeofResource(hInstance, hRes);
-    LPVOID lpPngData = LockResource(hMem);
+    PVOID lpPngData = LockResource(hMem);
 
     if (lpPngData == NULL)
         return NULL;
@@ -250,10 +250,7 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
     image.version = PNG_IMAGE_VERSION;
 
     if (png_image_begin_read_from_memory(&image, lpPngData, dwPngSize) == 0)
-    {
-        MessageBoxA(hwnd, "Failed to read PNG file from memory", "Error", MB_OK | MB_ICONERROR);
         return NULL;
-    }
 
     image.format = PNG_FORMAT_RGBA;
 
@@ -261,7 +258,6 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
     if (buffer == NULL)
     {
         png_image_free(&image);
-        MessageBoxA(hwnd, "Failed to allocate a buffer for reading PNG file!", "Error", MB_OK | MB_ICONERROR);
         return NULL;
     }
 
@@ -269,11 +265,37 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
     {
         png_image_free(&image);
         HeapFree(GetProcessHeap(), 0, buffer);
-        MessageBoxA(hwnd, "Failed to parse PNG file!", "Error", MB_OK | MB_ICONERROR);
         return NULL;
     }
 
-    HBITMAP hBitmap = CreateBitmap(image.width, image.height, 1, 32, buffer);
+    BITMAPINFO bmi;
+    ZeroMemory(&bmi, sizeof(bmi));
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = image.width;
+    bmi.bmiHeader.biHeight = -image.height;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 32;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    HDC hdc = GetDC(NULL);
+    void* bits;
+    HBITMAP hBitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
+    ReleaseDC(NULL, hdc);
+
+    if (hBitmap)
+    {
+        HDC hdcMem = CreateCompatibleDC(NULL);
+        HBITMAP oldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
+
+        if (SetDIBits(hdcMem, hBitmap, 0, image.height, buffer, &bmi, DIB_RGB_COLORS) == 0)
+        {
+            DeleteObject(hBitmap);
+            hBitmap = NULL;
+        }
+
+        SelectObject(hdcMem, oldBitmap);
+        DeleteDC(hdcMem);
+    }
 
     HeapFree(GetProcessHeap(), 0, buffer);
     png_image_free(&image);
@@ -281,32 +303,40 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, HWND hwnd, int nResId)
     return hBitmap;
 }
 
-void DrawImage(HDC hdc, HBITMAP hBitmap, int x, int y, int width, int height)
-{
-    if (hBitmap == NULL)
-        return;
+void DrawImage(HDC hdc, HBITMAP hBitmap, int x, int y, int displayWidth, int displayHeight) {
+    if (!hBitmap) return;
 
     HDC hdcMem = CreateCompatibleDC(hdc);
-    HGDIOBJ oldBitmap = SelectObject(hdcMem, hBitmap);
+    HBITMAP oldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
 
     BITMAP bitmap;
-    GetObject(hBitmap, sizeof(BITMAP), &bitmap);
+    GetObject(hBitmap, sizeof(bitmap), &bitmap);
 
-    // calculate aspect ratio to fit the image to the current size
-    FLOAT fRatio = (FLOAT)bitmap.bmWidth / bitmap.bmHeight;
-    LONG lNewWidth = width;
-    LONG lNewHeight = (LONG)(lNewWidth / fRatio);
+    float imageAspectRatio = (float)bitmap.bmWidth / bitmap.bmHeight;
+    float displayAspectRatio = (float)displayWidth / displayHeight;
 
-    if (lNewHeight > height)
+    int newWidth, newHeight;
+    
+    if (imageAspectRatio > displayAspectRatio) 
     {
-        lNewHeight = height;
-        lNewWidth = (LONG)(lNewHeight * fRatio);
+        newWidth = displayWidth;
+        newHeight = (int)(displayWidth / imageAspectRatio);
+    } 
+    else 
+    {
+        newHeight = displayHeight;
+        newWidth = (int)(displayHeight * imageAspectRatio);
     }
 
-    LONG offsetX = (width - lNewWidth) / 2;
-    LONG offsetY = (height - lNewHeight) / 2;
+    int offsetX = (displayWidth - newWidth) / 2;
+    int offsetY = (displayHeight - newHeight) / 2;
 
-    StretchBlt(hdc, x, y, lNewWidth, lNewHeight, hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, SRCCOPY);
+    BLENDFUNCTION bf = { 0 };
+    bf.BlendOp = AC_SRC_OVER;
+    bf.SourceConstantAlpha = 255;
+    bf.AlphaFormat = AC_SRC_ALPHA;
+
+    AlphaBlend(hdc, x + offsetX, y + offsetY, newWidth, newHeight, hdcMem, 0, 0, bitmap.bmWidth, bitmap.bmHeight, bf);
 
     SelectObject(hdcMem, oldBitmap);
     DeleteDC(hdcMem);
