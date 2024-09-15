@@ -31,8 +31,9 @@ FetchContent_Declare(
         GIT_TAG        v1.3.1
 )
 
+set(ZLIB_BUILD_EXAMPLES OFF)
 set(BUILD_SHARED_LIBS OFF)
-    
+
 FetchContent_MakeAvailable(zlib)
 
 FetchContent_GetProperties(zlib)
@@ -54,10 +55,10 @@ FetchContent_Declare(
     GIT_TAG        v1.6.44
 )
 
-set(PNG_BUILD_TESTS OFF CACHE BOOL "Build the libpng test programs")
-set(PNG_BUILD_EXAMPLES OFF CACHE BOOL "Build the libpng example programs")
-
-set(BUILD_SHARED_LIBS OFF)
+set(PNG_TESTS OFF)
+set(PNG_STATIC ON)
+set(PNG_SHARED OFF)
+set(PNG_TOOLS OFF)
 
 FetchContent_MakeAvailable(libpng)
 
@@ -80,6 +81,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     uxtheme.lib
 
     zlib
+    # png
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE 
