@@ -1,7 +1,6 @@
 # SimpleNotepad: A Good Old Windows Notepad Clone
 
-[![Build Status](https://github.com/SFINXVC/SimpleNotepad/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/SFINXVC/SimpleNotepad/actions)  
-[![License](https://img.shields.io/github/license/SFINXVC/SimpleNotepad)](LICENSE)
+[![Build Status](https://github.com/SFINXVC/SimpleNotepad/actions/workflows/cmake-build.yml/badge.svg)](https://github.com/SFINXVC/SimpleNotepad/actions)  [![License](https://img.shields.io/github/license/SFINXVC/SimpleNotepad)](LICENSE)
 
 ## Overview
 
