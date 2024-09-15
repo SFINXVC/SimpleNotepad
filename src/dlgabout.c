@@ -20,7 +20,6 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
         }
         case WM_COMMAND:
         {
-            // Handle the "OK" button
             if (LOWORD(wParam) == 1)
             {
                 SendMessage(hwnd, WM_CLOSE, 0, 0);\
@@ -34,7 +33,7 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             HDC hdc = (HDC)wParam;
             RECT rect;
             GetClientRect(hwnd, &rect);
-            FillRect(hdc, &rect, CreateSolidBrush(RGB(0xF0, 0xF0, 0xF0))); // Fill background with #F0F0F0
+            FillRect(hdc, &rect, CreateSolidBrush(RGB(0xF0, 0xF0, 0xF0)));
             return 1;
             break;
         }
@@ -47,7 +46,7 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
 {
-    // get the parent siz
+    // get the parent size
     RECT parentRect;
     GetWindowRect(parent, &parentRect);
 
@@ -87,16 +86,12 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         VARIABLE_PITCH, L"Segoe UI"
     );
 
-    HWND hPicture1 = CreateWindowExW(0, L"STATIC", NULL, 
-        WS_CHILD | WS_VISIBLE | SS_BITMAP,
-        12, 12, 428, 103,
+    HWND hSeparator = CreateWindowW(L"STATIC", NULL, 
+        WS_CHILD | WS_VISIBLE | SS_ETCHEDHORZ, 
+        12, 125, 428, 2, 
         hAboutWindow, NULL, hInstance, NULL
     );
-    HWND hPicture2 = CreateWindowExW(0, L"STATIC", NULL, 
-        WS_CHILD | WS_VISIBLE | SS_BITMAP,
-        12, 138, 50, 50, 
-        hAboutWindow, NULL, hInstance, NULL
-    );
+
 
     HWND hText1 = CreateWindowExW(
         WS_EX_TRANSPARENT, L"STATIC", L"SimpleNotepad\n© 2024 SFINXV. All rights reserved.",

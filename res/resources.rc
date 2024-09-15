@@ -1,8 +1,8 @@
 #define ID_APP_ICO 100
-// #define ID_APP_BNR 101
-// #define ID_APP_ICO_BIG 102
+#define ID_APP_BNR 101
+#define ID_APP_ICO_BIG 102
 
 ID_APP_ICO ICON "icon.ico"
 
-// ID_APP_BNR BITMAP DISCARDABLE "bnr.bmp"
-// ID_APP_ICO_BIG BITMAP DISCARDABLE "ico.bmp"
+ID_APP_BNR PNG "banner.png"
+ID_APP_ICO_BIG PNG "icon.png"

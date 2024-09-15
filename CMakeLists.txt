@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
+include(FetchContent)
+
 project(SimpleNotepad LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
@@ -21,5 +23,67 @@ add_executable(${PROJECT_NAME} WIN32
     res/resources.rc
 )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE user32.lib comctl32.lib dwmapi.lib shlwapi.lib uxtheme.lib)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+message(STATUS "Fetching zlib...")
+
+FetchContent_Declare(
+        zlib
+        GIT_REPOSITORY https://github.com/madler/zlib/
+        GIT_TAG        v1.3.1
+)
+
+set(BUILD_SHARED_LIBS OFF)
+    
+FetchContent_MakeAvailable(zlib)
+
+FetchContent_GetProperties(zlib)
+if(NOT zlib_POPULATED)
+    FetchContent_Populate(zlib)
+endif()
+
+set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlib.lib")
+set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
+
+# need to find the zconf.h
+include_directories("${zlib_BINARY_DIR}")
+
+message(STATUS "Fetching libpng...")
+
+FetchContent_Declare(
+    libpng
+    GIT_REPOSITORY https://github.com/pnggroup/libpng.git
+    GIT_TAG        v1.6.44
+)
+
+set(PNG_BUILD_TESTS OFF CACHE BOOL "Build the libpng test programs")
+set(PNG_BUILD_EXAMPLES OFF CACHE BOOL "Build the libpng example programs")
+
+set(BUILD_SHARED_LIBS OFF)
+
+FetchContent_MakeAvailable(libpng)
+
+FetchContent_GetProperties(libpng)
+if(NOT libpng_POPULATED)
+    FetchContent_Populate(libpng)
+endif()
+
+set(PNG_LIBRARY "${libpng_BINARY_DIR}/libpng.lib")
+set(PNG_INCLUDE_DIR "${libpng_SOURCE_DIR}/include")
+
+include_directories("${PNG_INCLUDE_DIR}")
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    user32.lib 
+    gdiplus.lib 
+    comctl32.lib 
+    dwmapi.lib 
+    shlwapi.lib 
+    uxtheme.lib
+
+    zlib
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${zlib_SOURCE_DIR}
+    ${libpng_SOURCE_DIR}
+)

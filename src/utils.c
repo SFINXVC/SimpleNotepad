@@ -51,7 +51,7 @@ void OpenFileDialog(HWND hwnd, WCHAR* filter, WCHAR* initialDir, WCHAR** ppFileC
     ofn.lStructSize = sizeof(OPENFILENAMEW);
     ofn.hwndOwner = hwnd;
     ofn.lpstrFile = lpFilePath;
-    ofn.nMaxFile = MAX_PATH;  // FIXED: Jangan kali dengan sizeof(WCHAR)
+    ofn.nMaxFile = MAX_PATH;
     ofn.lpstrFilter = filter;
     ofn.nFilterIndex = 1;
     ofn.lpstrInitialDir = initialDir;
