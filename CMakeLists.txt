@@ -41,6 +41,11 @@ if(NOT zlib_POPULATED)
     FetchContent_Populate(zlib)
 endif()
 
+file(GLOB ZLIB_LIBS "${zlib_BINARY_DIR}/*.lib")
+foreach(lib_file ${ZLIB_LIBS})
+    message(STATUS "Found zlib lib file: ${lib_file}")
+endforeach()
+
 set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlib.lib")
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
