@@ -28,7 +28,12 @@ jobs:
         run: choco install ninja
 
       - name: Configure with CMake
-        run: cmake -S . -B build -G "Ninja" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: cmake ^ 
+            -DCMAKE_BUILD_TYPE:STRING=MinSizeRel
+            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+            "-DCMAKE_C_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\clang.exe"
+            "-DCMAKE_CXX_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\clang.exe" 
+            --no-warn-unused-cli "-SC:." "-Bc:./build" -G Ninja
 
       - name: Build with Clang
         run: cmake --build build --config Release -- -v
