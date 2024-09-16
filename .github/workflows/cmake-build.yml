@@ -21,8 +21,8 @@ jobs:
         with:
           cmake-version: '3.21.3'
 
-      # - name: Install Ninja
-      #   run: choco install ninja
+      - name: Install Ninja
+        run: choco install ninja
 
       - name: Configure with CMake
         run: cmake ^ 
