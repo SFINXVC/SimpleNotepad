@@ -16,9 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Chocolatey
-        uses: choco-install@v1
-
       - name: Install LLVM with Chocolatey
         run: choco install llvm --version=17.0.3
 
