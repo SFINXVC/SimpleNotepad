@@ -46,6 +46,7 @@ set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
 # need to find the zconf.h
 include_directories("${zlib_BINARY_DIR}")
+include_directories("${zlib_SOURCE_DIR}")
 
 message(STATUS "Fetching libpng...")
 

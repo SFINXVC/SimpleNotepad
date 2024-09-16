@@ -19,13 +19,13 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.21.3'
+          cmake-version: '3.29.5'
 
       - name: Install Ninja
         run: choco install ninja
 
       - name: Configure with CMake
-        run: cmake ^ 
+        run: cmake
             -DCMAKE_BUILD_TYPE:STRING=MinSizeRel
             -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
             "-DCMAKE_C_COMPILER=clang"
