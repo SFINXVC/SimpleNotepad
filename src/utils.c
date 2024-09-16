@@ -287,6 +287,28 @@ HBITMAP LoadPngFromResource(HINSTANCE hInstance, int nResId)
         HDC hdcMem = CreateCompatibleDC(NULL);
         HBITMAP oldBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
 
+        // a quick fix for AlphaBlend not showing the right alpha
+        for (int y = 0; y < image.height; y++)
+        {
+            png_bytep row = buffer + (y * image.width * 4); // 4 bytes per px (RGBA)
+            for (int x = 0; x < image.width; x++)
+            {
+                png_bytep px = row + (x * 4);
+                
+                // premultiply alpha
+                px[0] = (px[0] * px[3]) / 255; // r
+                px[1] = (px[1] * px[3]) / 255; // g
+                px[2] = (px[2] * px[3]) / 255; // b
+
+                // another fix, CreateDIBSection basically uses BGRA instead of RGBA
+                // so, we need to swap red (px[2]) and blue (px[0])
+                png_byte temp = px[0];
+                px[0] = px[2]; // swipe blue to red
+                px[2] = temp;  // swipe red to blue
+            }
+        }
+
+
         if (SetDIBits(hdcMem, hBitmap, 0, image.height, buffer, &bmi, DIB_RGB_COLORS) == 0)
         {
             DeleteObject(hBitmap);
