@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        
+
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
@@ -30,7 +30,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
             "-DCMAKE_C_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\clang.exe"
             "-DCMAKE_CXX_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\x64\bin\clang.exe" 
-            --no-warn-unused-cli "-SC:." "-Bc:./build" -G Ninja
+            --no-warn-unused-cli "-S." "-B./build" -G Ninja
 
       - name: Build with Clang
         run: cmake --build build --config Release -- -v
