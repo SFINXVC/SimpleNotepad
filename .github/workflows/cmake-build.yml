@@ -16,10 +16,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install Chocolatey
+        uses: choco-install@v1
+
+      - name: Install LLVM with Chocolatey
+        run: choco install llvm --version=17.0.3
+
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.21.3'
+
+      - name: Install Ninja
+        run: choco install ninja
 
       - name: Configure with CMake
         run: cmake -S . -B build -G "Ninja" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
