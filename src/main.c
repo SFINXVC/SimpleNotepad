@@ -29,54 +29,45 @@ static HWND ghEdit;
 
 LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 {
-    // CTRL & A handle 
-    // (unecessarry since we're using a RichEdit instead of the traditional EDIT ctrl class)
-    // (it's just not rlly needed since it's alr handled)
-    /*if (nCode == HC_ACTION && wParam == 0x41 && GetAsyncKeyState(VK_CONTROL) < 0)
-    {
-        SendMessage(ghEdit, EM_SETSEL, 0, -1);
-        return 1;
-    }*/
+    // if (nCode == HC_ACTION && wParam == 0x4F && GetAsyncKeyState(VK_CONTROL) < 0)
+    // {
+    //     if (GetAsyncKeyState(0x4F) >= 0)
+    //         return CallNextHookEx(NULL, nCode, wParam, lParam);
 
-    if (nCode == HC_ACTION && wParam == 0x4F && GetAsyncKeyState(VK_CONTROL) < 0)
-    {
-        if (GetAsyncKeyState(0x4F) >= 0)
-            return CallNextHookEx(NULL, nCode, wParam, lParam);
+    //     PostMessage(ghWindow, WM_COMMAND, ID_FILE_OPEN, 0);
+    //     return 1;
+    // }
 
-        PostMessage(ghWindow, WM_COMMAND, ID_FILE_OPEN, 0);
-        return 1;
-    }
+    // if (nCode == HC_ACTION && wParam == 0x53 && GetAsyncKeyState(VK_CONTROL) < 0)
+    // {
+    //     if (GetAsyncKeyState(0x53) >= 0)
+    //         return CallNextHookEx(NULL, nCode, wParam, lParam);
 
-    if (nCode == HC_ACTION && wParam == 0x53 && GetAsyncKeyState(VK_CONTROL) < 0)
-    {
-        if (GetAsyncKeyState(0x53) >= 0)
-            return CallNextHookEx(NULL, nCode, wParam, lParam);
+    //     PostMessage(ghWindow, WM_COMMAND, ID_FILE_SAVE, 0);
+    //     return 1;
+    // }
 
-        PostMessage(ghWindow, WM_COMMAND, ID_FILE_SAVE, 0);
-        return 1;
-    }
+    // if (nCode == HC_ACTION && wParam == 0x2B && GetAsyncKeyState(VK_CONTROL) < 0)
+    // {
+    //     int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
+    //     zoomLevel += 10;
 
-    if (nCode == HC_ACTION && wParam == 0x2B && GetAsyncKeyState(VK_CONTROL) < 0)
-    {
-        int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
-        zoomLevel += 10;
+    //     SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
+    //     return 1;
+    // }
 
-        SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
-        return 1;
-    }
+    // if (nCode == HC_ACTION && wParam == 0x2D && GetAsyncKeyState(VK_CONTROL) < 0)
+    // {
+    //     int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
 
-    if (nCode == HC_ACTION && wParam == 0x2D && GetAsyncKeyState(VK_CONTROL) < 0)
-    {
-        int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
+    //     zoomLevel -= 10;
 
-        zoomLevel -= 10;
+    //     if (zoomLevel < 50) 
+    //         zoomLevel = 50;
 
-        if (zoomLevel < 50) 
-            zoomLevel = 50;
-
-        SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
-        return 1;
-    }
+    //     SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
+    //     return 1;
+    // }
 
     return CallNextHookEx(NULL, nCode, wParam, lParam);
 }
@@ -321,6 +312,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         return -1;
     }
 
+    // accelerator table - a better way to handle shortcuts
+    ACCEL accel[] = {
+        { FVIRTKEY | FCONTROL, 'O', ID_FILE_OPEN }, // CTRL + O
+        { FVIRTKEY | FCONTROL, 'S', ID_FILE_SAVE }, // CTRL + S
+    };
+
+    HACCEL hAccel = CreateAcceleratorTable(accel, sizeof(accel) / sizeof(ACCEL));
+
     ShowWindow(ghWindow, nCmdShow);
     UpdateWindow(ghWindow);
 
@@ -334,8 +333,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             return -1;
         }
 
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        if (!TranslateAccelerator(ghWindow, hAccel, &msg))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
     }
 
     return msg.wParam; 
