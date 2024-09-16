@@ -45,6 +45,7 @@ set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlib.lib")
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
 message(STATUS "ZLIB Build dir: ${zlib_BINARY_DIR}")
+
 # need to find the zconf.h
 include_directories("${zlib_BINARY_DIR}")
 include_directories("${zlib_SOURCE_DIR}")
@@ -92,8 +93,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${zlib_SOURCE_DIR}
     ${libpng_SOURCE_DIR}
 )
-
-file(GLOB_RECURSE ZCONF_H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
 
 file(GLOB_RECURSE ZCONF_H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
 
