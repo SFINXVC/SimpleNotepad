@@ -21,8 +21,8 @@ jobs:
         with:
           cmake-version: '3.21.3'
 
-      - name: Install Ninja
-        run: choco install ninja
+      # - name: Install Ninja
+      #   run: choco install ninja
 
       - name: Configure with CMake
         run: cmake ^ 
@@ -33,4 +33,4 @@ jobs:
             --no-warn-unused-cli "-S." "-B./build" -G Ninja
 
       - name: Build with Clang
-        run: cmake --build build --config Release -- -v
+        run: cmake --build build --config MinSizeRel --target all --
