@@ -21,12 +21,6 @@ jobs:
         with:
           cmake-version: '3.21.3'
 
-      - name: Install LLVM
-        uses: llvm/setup-llvm@v2
-        with:
-          version: '17.0.3'
-          clang: true
-
       - name: Configure with CMake
         run: cmake -S . -B build -G "Ninja" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 
