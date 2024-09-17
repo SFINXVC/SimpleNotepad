@@ -72,6 +72,18 @@ else()
 endif()
 
 # FUCKKK YOU MICROSOFT, LIBPNG & ZLIB IDIOT
+file(GLOB_RECURSE ZCONF_H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
+
+if(NOT ZCONF_H_FILES)
+    message(FATAL_ERROR "Error: 'zconf.h' not found in the current directory or any subdirectories.")
+else()
+    foreach(file ${ZCONF_H_FILES})
+        message(STATUS "Found zconf.h: ${file}")
+        get_filename_component(zconf_header_dir ${file} DIRECTORY)
+        message(STATUS "Tried to include zconf.h at ${zconf_header_dir}")
+        include_directories(${zconf_header_dir})
+    endforeach()
+endif()
 
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
@@ -125,16 +137,3 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${zlib_SOURCE_DIR}
     ${libpng_SOURCE_DIR}
 )
-
-file(GLOB_RECURSE ZCONF_H_FILES "${CMAKE_CURRENT_SOURCE_DIR}/zconf.h")
-
-if(NOT ZCONF_H_FILES)
-    message(FATAL_ERROR "Error: 'zconf.h' not found in the current directory or any subdirectories.")
-else()
-    foreach(file ${ZCONF_H_FILES})
-        message(STATUS "Found zconf.h: ${file}")
-        get_filename_component(zconf_header_dir ${file} DIRECTORY)
-        message(STATUS "Tried to include zconf.h at ${zconf_header_dir}")
-        include_directories(${zconf_header_dir})
-    endforeach()
-endif()
