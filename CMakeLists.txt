@@ -42,7 +42,17 @@ if(NOT zlib_POPULATED)
     FetchContent_Populate(zlib)
 endif()
 
-set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlib.lib")
+# set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/zlib.lib")
+file(GLOB_RECURSE ZLIB_LIB_PATH "${zlib_BINARY_DIR}/zlib.lib")
+
+# Kalau ketemu, tambahin ke linker
+if(ZLIB_LIB_PATH)
+    message(STATUS "Found zlib: ${ZLIB_LIB_PATH}")
+    set(ZLIB_LIBRARY "${ZLIB_LIB_PATH}")
+else()
+    message(FATAL_ERROR "zlib.lib not found!")
+endif()
+
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
 message(STATUS "ZLIB Build dir: ${zlib_BINARY_DIR}")

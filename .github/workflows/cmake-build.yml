@@ -19,18 +19,10 @@ jobs:
       - name: Install CMake
         uses: jwlawson/actions-setup-cmake@v2
         with:
-          cmake-version: '3.29.5'
-
-      - name: Install Ninja
-        run: choco install ninja
+          cmake-version: '3.21.3'
 
       - name: Configure with CMake
-        run: cmake
-            -DCMAKE_BUILD_TYPE:STRING=MinSizeRel
-            -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
-            "-DCMAKE_C_COMPILER=clang"
-            "-DCMAKE_CXX_COMPILER=clang"
-            --no-warn-unused-cli "-S." "-B./build" -G Ninja
+        run: cmake -S . -B build -G "Visual Studio 17 2022"
 
-      - name: Build with Clang
-        run: cmake --build build --config MinSizeRel --target all --
+      - name: Build with MSVC
+        run: cmake --build build --config MinSizeRel
