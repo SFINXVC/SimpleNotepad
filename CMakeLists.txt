@@ -32,6 +32,7 @@ FetchContent_Declare(
 )
 
 set(ZLIB_BUILD_EXAMPLES OFF)
+set(ZLIB_USE_STATIC_LIBS ON)
 set(BUILD_SHARED_LIBS OFF)
 
 FetchContent_MakeAvailable(zlib)
@@ -71,7 +72,7 @@ if(NOT libpng_POPULATED)
 endif()
 
 set(PNG_LIBRARY "${libpng_BINARY_DIR}/libpng.lib")
-set(PNG_INCLUDE_DIR "${libpng_SOURCE_DIR}/include")
+set(PNG_INCLUDE_DIR "${libpng_SOURCE_DIR}/include" "${libpng_BINARY_DIR}")
 
 include_directories("${PNG_INCLUDE_DIR}")
 
