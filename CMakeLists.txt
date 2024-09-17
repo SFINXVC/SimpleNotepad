@@ -54,8 +54,10 @@ else()
     # handle the case where the file does not exist
 endif()
 
+file(GLOB_RECURSE ZLIB_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/zlib.lib")
+
 if(ZLIB_LIB_PATH)
-    message(STATUS "Found zlib: ${ZLIB_LIB_PATH}")
+    message(STATUS "I FUCKING FOUND ZLIB LIB: ${ZLIB_LIB_PATH}")
     set(ZLIB_LIBRARY "${ZLIB_LIB_PATH}")
 else()
     message(STATUS "zlib.lib not found!")
@@ -67,6 +69,8 @@ else()
         message(WARNING "File zlib.lib does not exist, and seems like it was never existed, but nvm, let's see if the compiler gets the job done.")
     endif()
 endif()
+
+# FUCKKK YOU MICROSOFT, LIBPNG & ZLIB IDIOT
 
 set(ZLIB_INCLUDE_DIR "${zlib_SOURCE_DIR}")
 
