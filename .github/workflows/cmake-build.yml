@@ -21,8 +21,11 @@ jobs:
         with:
           cmake-version: '3.21.3'
 
-      - name: Configure with CMake
-        run: cmake -S . -B build -G "Visual Studio 17 2022"
+      - name: Install Ninja
+        run: choco install ninja -y
 
-      - name: Build with MSVC
-        run: cmake --build build --config Release --target ALL_BUILD -j 14 --
+      - name: Configure with CMake
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang
+
+      - name: Build with Ninja
+        run: cmake --build build --config Release -j 14
