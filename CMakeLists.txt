@@ -54,7 +54,7 @@ else()
     # handle the case where the file does not exist
 endif()
 
-file(GLOB_RECURSE ZLIB_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/zlib.lib")
+file(GLOB_RECURSE ZLIB_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/zlib.lib" "${CMAKE_CURRENT_SOURCE_DIR}/zlibstatic.lib")
 
 if(ZLIB_LIB_PATH)
     message(STATUS "I FUCKING FOUND ZLIB LIB: ${ZLIB_LIB_PATH}")
