@@ -21,11 +21,8 @@ jobs:
         with:
           cmake-version: '3.21.3'
 
-      - name: Install Ninja
-        run: choco install ninja -y
-
       - name: Configure with CMake
-        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang
+        run: cmake -S . -B build -G "Visual Studio 17 2022"
 
-      - name: Build with Ninja
-        run: cmake --build build --config Release -j 14
+      - name: Build with MSVC
+        run: cmake --build build --config MinSizeRel
