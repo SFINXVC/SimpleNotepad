@@ -67,6 +67,7 @@ else()
         set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/MinSizeRel/zlib.lib")
     else()
         message(WARNING "File zlib.lib does not exist, and seems like it was never existed, but nvm, let's see if the compiler gets the job done.")
+        set(ZLIB_LIBRARY "${zlib_BINARY_DIR}/MinSizeRel/zlibstatic.lib")
     endif()
 endif()
 
