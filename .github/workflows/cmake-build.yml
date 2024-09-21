@@ -25,7 +25,7 @@ jobs:
         run: choco install ninja
 
       - name: Configure with CMake
-        run: cmake -S . -B build -G Ninja -T ClangCL
+        run: cmake -S . -B build -G Ninja -DCMAKE_C_COMPILER=clang
 
       - name: Build with MSVC
         run: cmake --build build --config MinSizeRel
