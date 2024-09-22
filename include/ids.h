@@ -16,6 +16,10 @@
 
 #define ID_FORMAT_FONT 8
 
-#define ID_CONTROL_EDIT 9
+#define ID_VIEW_ZOOM_IN 9
+#define ID_VIEW_ZOOM_OUT 10
+#define ID_VIEW_ZOOM_RESET 11
+
+#define ID_CONTROL_EDIT 500
 
 #endif // __IDS_H

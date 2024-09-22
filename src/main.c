@@ -93,16 +93,33 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             AppendMenu(hFileMenu, MF_SEPARATOR, 0, NULL);
             AppendMenu(hFileMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_FILE_EXIT, TEXT("Exit\tAlt+F4"));
 
+            HMENU hEditMenu = CreateMenu();
+            // TODO: Add edit menu
+
+            HMENU hFormatMenu = CreateMenu();
+            AppendMenu(hFormatMenu, MF_STRING | MF_ENABLED, ID_FORMAT_FONT, TEXT("Font..."));
+
+            HMENU hVZoomMenu = CreatePopupMenu();
+            AppendMenu(hVZoomMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_VIEW_ZOOM_IN, "Zoom In\tCtrl+Plus");
+            AppendMenu(hVZoomMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_VIEW_ZOOM_OUT, "Zoom Out\tCtrl+Minus");
+            AppendMenu(hVZoomMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_VIEW_ZOOM_RESET, "Restore Default Zoom\tCtrl+0");
+
+            HMENU hViewMenu = CreateMenu();
+            AppendMenu(hViewMenu, MF_STRING | MF_POPUP, (UINT_PTR)hVZoomMenu, "Zoom");
+
+            HMENU hToolsMenu = CreateMenu();
+            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Enable Discord RPC"));
+
             HMENU hAboutMenu = CreateMenu();
             AppendMenu(hAboutMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_HELP_REPO, TEXT("View Repository\tF1"));
             AppendMenu(hAboutMenu, MF_SEPARATOR, 0, NULL);
             AppendMenu(hAboutMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_HELP_ABOUT, TEXT("About\tF2"));
 
-            HMENU hFormatMenu = CreateMenu();
-            AppendMenu(hFormatMenu, MF_STRING | MF_ENABLED, ID_FORMAT_FONT, TEXT("Font..."));
-
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, TEXT("File"));
+            AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, TEXT("Edit"));
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFormatMenu, TEXT("Format"));
+            AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, TEXT("Tools"));
+            AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hViewMenu, TEXT("View"));
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hAboutMenu, TEXT("Help"));
             
             SetMenu(hwnd, hMenu);
@@ -162,7 +179,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 {
                     WCHAR* pFileContent = NULL;
                     WCHAR* pFileName = NULL;
-                    OpenFileDialog(hwnd, L"All Files\0*.*\0Text Documents (*.txt)\0*.txt\0", L"", &pFileContent, &pFileName);
+                    OpenFileDialog(hwnd, L"Text Documents (*.txt)\0*.txt\0All Files\0*.*\0", L"", &pFileContent, &pFileName);
 
                     if (pFileContent != NULL)
                     {
@@ -182,7 +199,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     WCHAR* fileContents = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (SIZE_T)((textLength + 1) * sizeof(WCHAR)));
                     SendMessage(ghEdit, WM_GETTEXT, textLength + 1, (LPARAM)fileContents);
 
-                    SaveFileDialog(hwnd, L"All Files\0*.*\0Text Documents (*.txt)\0*.txt\0", NULL, L"example.txt", &fileContents);
+                    SaveFileDialog(hwnd, L"Text Documents (*.txt)\0*.txt\0All Files\0*.*\0", NULL, L"Untitled.txt", &fileContents);
 
                     HeapFree(GetProcessHeap(), 0, fileContents);
                     break;
@@ -243,6 +260,30 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                         MessageBox(NULL, "Failed to show AboutDialogBox (handle returned NULL)", "Error", MB_OK | MB_ICONERROR);
 
                     ShowWindow(dlgabout, SW_SHOW);
+                    break;
+                }
+                case ID_VIEW_ZOOM_IN:
+                {
+                    LONG zoomLevel = SendMessage(ghEdit, EM_GETZOOM, TRUE, 0);
+                    zoomLevel += 1;
+
+                    SendMessage(ghEdit, EM_SETZOOM, TRUE, zoomLevel);
+                    return 1;
+                }
+                case ID_VIEW_ZOOM_OUT:
+                {
+                    LONG zoomLevel = SendMessage(ghEdit, EM_GETZOOM, TRUE, 0);
+                    zoomLevel -= 10;
+
+                    if (zoomLevel < 10) 
+                        zoomLevel = 10;
+
+                    SendMessage(ghEdit, EM_SETZOOM, zoomLevel, TRUE);
+                    return 1;
+                }
+                case ID_VIEW_ZOOM_RESET:
+                {
+                    MessageBox(hwnd, "Called ID_VIEW_ZOOM_RESET", NULL, MB_OK);
                     break;
                 }
             }
@@ -316,6 +357,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ACCEL accel[] = {
         { FVIRTKEY | FCONTROL, 'O', ID_FILE_OPEN }, // CTRL + O
         { FVIRTKEY | FCONTROL, 'S', ID_FILE_SAVE }, // CTRL + S
+        { FVIRTKEY | FCONTROL, VK_ADD, ID_VIEW_ZOOM_IN }, // CTRL + +
+        { FVIRTKEY | FCONTROL, VK_SUBTRACT, ID_VIEW_ZOOM_OUT }, // CTRL + -
+        { FVIRTKEY | FCONTROL, '0', ID_VIEW_ZOOM_OUT }, // CTRL + 0
     };
 
     HACCEL hAccel = CreateAcceleratorTable(accel, sizeof(accel) / sizeof(ACCEL));

@@ -8,3 +8,4 @@ set(ZLIB_LIBRARY ${CMAKE_BINARY_DIR}/libs/zlib/zlib.lib)
 include_directories(${CMAKE_BINARY_DIR}/libs/zlib)
 
 add_subdirectory(libpng)
+add_subdirectory(discord)

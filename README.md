@@ -29,7 +29,7 @@ I made this project using C, and CMake as the build system (I actually wanted to
    cd SimpleNotepad
    ```
 
-2. Install dependencies (wait, there are **no external dependencies** here).
+2. Install dependencies (just, install it by urself if needed).
 
 3. Build the project:
    ```bash
