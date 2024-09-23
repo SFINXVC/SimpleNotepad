@@ -21,5 +21,6 @@
 #define ID_VIEW_ZOOM_RESET 11
 
 #define ID_CONTROL_EDIT 500
+#define ID_CONTROL_STATUSBAR 501
 
 #endif // __IDS_H

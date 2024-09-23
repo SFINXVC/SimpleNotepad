@@ -24,53 +24,9 @@
 
 static HWND ghWindow;
 static HWND ghEdit;
+static HWND ghStatusBar;
 
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-
-LRESULT CALLBACK KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
-{
-    // if (nCode == HC_ACTION && wParam == 0x4F && GetAsyncKeyState(VK_CONTROL) < 0)
-    // {
-    //     if (GetAsyncKeyState(0x4F) >= 0)
-    //         return CallNextHookEx(NULL, nCode, wParam, lParam);
-
-    //     PostMessage(ghWindow, WM_COMMAND, ID_FILE_OPEN, 0);
-    //     return 1;
-    // }
-
-    // if (nCode == HC_ACTION && wParam == 0x53 && GetAsyncKeyState(VK_CONTROL) < 0)
-    // {
-    //     if (GetAsyncKeyState(0x53) >= 0)
-    //         return CallNextHookEx(NULL, nCode, wParam, lParam);
-
-    //     PostMessage(ghWindow, WM_COMMAND, ID_FILE_SAVE, 0);
-    //     return 1;
-    // }
-
-    // if (nCode == HC_ACTION && wParam == 0x2B && GetAsyncKeyState(VK_CONTROL) < 0)
-    // {
-    //     int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
-    //     zoomLevel += 10;
-
-    //     SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
-    //     return 1;
-    // }
-
-    // if (nCode == HC_ACTION && wParam == 0x2D && GetAsyncKeyState(VK_CONTROL) < 0)
-    // {
-    //     int zoomLevel = SendMessage(ghEdit, EM_GETZOOM, 0, 0);
-
-    //     zoomLevel -= 10;
-
-    //     if (zoomLevel < 50) 
-    //         zoomLevel = 50;
-
-    //     SendMessage(ghEdit, EM_SETZOOM, zoomLevel, 0);
-    //     return 1;
-    // }
-
-    return CallNextHookEx(NULL, nCode, wParam, lParam);
-}
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -79,6 +35,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_INITDIALOG:
         {
             InitCommonControls();
+            break;
+        }
+        case WM_MOUSEWHEEL:
+        {
+            MessageBox(hwnd, "", "I Know and  u know", MB_OK | MB_ICONINFORMATION);
             break;
         }
         case WM_CREATE:
@@ -109,6 +70,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             HMENU hToolsMenu = CreateMenu();
             AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Enable Discord RPC"));
+            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Enable Word Warp"));
+            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Show Lines"));
 
             HMENU hAboutMenu = CreateMenu();
             AppendMenu(hAboutMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_HELP_REPO, TEXT("View Repository\tF1"));
@@ -116,7 +79,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             AppendMenu(hAboutMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_HELP_ABOUT, TEXT("About\tF2"));
 
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, TEXT("File"));
-            AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFileMenu, TEXT("Edit"));
+            AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hEditMenu, TEXT("Edit"));
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hFormatMenu, TEXT("Format"));
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hToolsMenu, TEXT("Tools"));
             AppendMenu(hMenu, MF_POPUP, (UINT_PTR)hViewMenu, TEXT("View"));
@@ -125,18 +88,29 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             SetMenu(hwnd, hMenu);
 
             ghEdit = CreateWindowExW(
-                0,
+                ES_EX_ZOOMABLE,
                 MSFTEDIT_CLASS,
                 NULL,
-                WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL,
+                WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_DISABLENOSCROLL,
                 0, 0, 0, 0,
                 hwnd, (HMENU)ID_CONTROL_EDIT, ((LPCREATESTRUCT)lParam)->hInstance, NULL
             );
 
             if (ghEdit == NULL)
-                ShowLastError(L"Failed to create an EDIT window");
+                ShowLastError(L"Failed to create an EDIT control");
 
-            SetWindowsHookEx(WH_KEYBOARD, KeyboardProc, NULL, GetCurrentThreadId());
+            ghStatusBar = CreateWindowExW(0, STATUSCLASSNAMEW, NULL,
+                WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0,
+                hwnd, (HMENU)ID_CONTROL_STATUSBAR, ((LPCREATESTRUCT)lParam)->hInstance, NULL
+            );
+
+            if (ghStatusBar == NULL)
+                ShowLastError(L"Failed to create an STATUSBAR control");
+
+            int statwidths[] = { -1 };
+            SendMessage(ghStatusBar, SB_SETPARTS, 1, (LPARAM)statwidths);
+            SendMessage(ghStatusBar, SB_SETTEXT, 0, (LPARAM)TEXT("This status bar should display more information, but it hasn't been implemented yet."));
+
 
             HFONT hFont = CreateFontW(
                 16, 0, 0, 0,
@@ -159,7 +133,16 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
         case WM_SIZE:
         {
-            MoveWindow(ghEdit, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+            RECT rcClient;
+            GetClientRect(hwnd, &rcClient);
+
+            RECT rcStatus;
+            GetWindowRect(ghStatusBar, &rcStatus);
+            int iStatusHeight = rcStatus.bottom - rcStatus.top;
+
+            MoveWindow(ghEdit, 0, 0, rcClient.right, rcClient.bottom - iStatusHeight, TRUE);
+
+            SendMessage(ghStatusBar, WM_SIZE, 0, 0);
             break;
         }
         case WM_SETFOCUS:
@@ -191,6 +174,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                         SendMessage(ghEdit, EM_SETTEXTEX, (WPARAM)&stx, (LPARAM)pFileContent);
                         HeapFree(GetProcessHeap(), 0, pFileContent);
                     }
+
+                    if (pFileName != NULL)
+                    {
+                        // Ubah title window
+                        WCHAR title[256];
+                        wsprintfW(title, L"%s - SimpleNotepad", pFileName);
+                        SetWindowTextW(hwnd, title);
+                    }
+
                     break;
                 }
                 case ID_FILE_SAVE:
@@ -264,26 +256,41 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
                 case ID_VIEW_ZOOM_IN:
                 {
-                    LONG zoomLevel = SendMessage(ghEdit, EM_GETZOOM, TRUE, 0);
-                    zoomLevel += 1;
+                    int num, denom;
+                    SendMessage(ghEdit, EM_GETZOOM, (WPARAM)&num, (LPARAM)&denom);
 
-                    SendMessage(ghEdit, EM_SETZOOM, TRUE, zoomLevel);
-                    return 1;
+                    if (num == 0 || denom == 0)
+                    {
+                        num = 1;
+                        denom = 1;
+                    }
+
+                    if (num < 64)
+                        num++;
+
+                    SendMessage(ghEdit, EM_SETZOOM, num, denom);
+                    break;
                 }
                 case ID_VIEW_ZOOM_OUT:
                 {
-                    LONG zoomLevel = SendMessage(ghEdit, EM_GETZOOM, TRUE, 0);
-                    zoomLevel -= 10;
+                    int num, denom;
+                    SendMessage(ghEdit, EM_GETZOOM, (WPARAM)&num, (LPARAM)&denom);
 
-                    if (zoomLevel < 10) 
-                        zoomLevel = 10;
+                    if (num == 0 || denom == 0)
+                    {
+                        num = 1;
+                        denom = 1;
+                    }
 
-                    SendMessage(ghEdit, EM_SETZOOM, zoomLevel, TRUE);
-                    return 1;
+                    if (num > 1)
+                        num--;
+
+                    SendMessage(ghEdit, EM_SETZOOM, num, denom);
+                    break;
                 }
                 case ID_VIEW_ZOOM_RESET:
                 {
-                    MessageBox(hwnd, "Called ID_VIEW_ZOOM_RESET", NULL, MB_OK);
+                    SendMessage(ghEdit, EM_SETZOOM, 0, 0);
                     break;
                 }
             }
@@ -357,10 +364,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     ACCEL accel[] = {
         { FVIRTKEY | FCONTROL, 'O', ID_FILE_OPEN }, // CTRL + O
         { FVIRTKEY | FCONTROL, 'S', ID_FILE_SAVE }, // CTRL + S
-        { FVIRTKEY | FCONTROL, VK_ADD, ID_VIEW_ZOOM_IN }, // CTRL + +
-        { FVIRTKEY | FCONTROL, VK_SUBTRACT, ID_VIEW_ZOOM_OUT }, // CTRL + -
-        { FVIRTKEY | FCONTROL, '0', ID_VIEW_ZOOM_OUT }, // CTRL + 0
+        { FVIRTKEY | FCONTROL, VK_OEM_PLUS, ID_VIEW_ZOOM_IN }, // CTRL + +
+        { FVIRTKEY | FCONTROL, VK_OEM_MINUS, ID_VIEW_ZOOM_OUT }, // CTRL + -
+        { FVIRTKEY | FCONTROL, '0', ID_VIEW_ZOOM_RESET }, // CTRL + 0
     };
+
 
     HACCEL hAccel = CreateAcceleratorTable(accel, sizeof(accel) / sizeof(ACCEL));
 

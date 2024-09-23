@@ -18,9 +18,10 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
     switch (uMsg)
     {
         case WM_CLOSE:
-        {
+        {                
             DestroyWindow(hwnd);
-            break;
+
+            return 1;
         }
         case WM_PAINT:
         {
@@ -31,17 +32,17 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             DrawImage(hdc, hImage2, 12, 138, 50, 50);
 
             EndPaint(hwnd, &ps);
-            break;
+            return 1;
         }
         case WM_COMMAND:
         {
             if (LOWORD(wParam) == 1)
             {
-                SendMessage(hwnd, WM_CLOSE, 0, 0);\
+                SendMessage(hwnd, WM_CLOSE, 0, 0);
                 EndDialog(hwnd, 0);
             }
 
-            break;
+            return 1;
         }
         case WM_ERASEBKGND:
         {
@@ -50,7 +51,6 @@ LRESULT CALLBACK AboutWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam
             GetClientRect(hwnd, &rect);
             FillRect(hdc, &rect, CreateSolidBrush(RGB(0xF0, 0xF0, 0xF0)));
             return 1;
-            break;
         }
         default:
             return DefWindowProcW(hwnd, uMsg, wParam, lParam);
@@ -73,7 +73,7 @@ HWND ShowAboutDialog(HINSTANCE hInstance, HWND parent)
         WS_EX_DLGMODALFRAME,
         L"#32770",
         L"About SimpleNotepad",
-        WS_OVERLAPPEDWINDOW & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX,
+        WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
         x, y, 468, 427,
         parent, NULL, hInstance, NULL
     );
