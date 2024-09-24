@@ -2,6 +2,7 @@
 #include <commctrl.h>
 #include <heapapi.h>
 #include <shellapi.h>
+#include <time.h>
 #include <wchar.h>
 #include <wingdi.h>
 #include <winuser.h>
@@ -9,6 +10,8 @@
 #include <Uxtheme.h>
 #include <dwmapi.h>
 #include <CommCtrl.h>
+#include <dcomp.h>
+#include <d3d11.h>
 
 #include "exception.h"
 #include "dlgabout.h"
@@ -48,6 +51,23 @@ LRESULT CALLBACK EditSubclassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
             break;
         }
+        // TODO: Implement this later!
+        // case WM_RBUTTONDOWN:
+        // {
+        //     HMENU hMenu = CreatePopupMenu();
+
+        //     if (hMenu)
+        //     {
+        //         AppendMenu(hMenu, MF_STRING | MF_RIGHTJUSTIFY | MF_DISABLED, 0, "(No implementation.)");
+
+        //         POINT pt;
+        //         GetCursorPos(&pt);
+        //         TrackPopupMenu(hMenu, TPM_RIGHTBUTTON, pt.x, pt.y, 0, hwnd, NULL);
+        //         DestroyMenu(hMenu);
+        //     }
+
+        //     break;
+        // }
     }
 
     return DefSubclassProc(hwnd, uMsg, wParam, lParam);
@@ -62,13 +82,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             InitCommonControls();
             break;
         }
-        case WM_MOUSEWHEEL:
-        {
-            MessageBox(hwnd, "", "I Know and  u know", MB_OK | MB_ICONINFORMATION);
-            break;
-        }
         case WM_CREATE:
         {
+
+
             HMENU hMenu = CreateMenu();
 
             HMENU hFileMenu = CreatePopupMenu();
@@ -109,9 +126,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             AppendMenu(hViewMenu, MF_STRING | MF_POPUP, (UINT_PTR)hVZoomMenu, "Zoom");
 
             HMENU hToolsMenu = CreateMenu();
-            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Enable Discord RPC"));
-            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Enable Word Warp"));
-            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_CHECKED, 0, TEXT("Show Lines"));
+            AppendMenu(hToolsMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY | MF_UNCHECKED, ID_TOOLS_DRPC, TEXT("Enable Discord RPC"));
+            AppendMenu(hToolsMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY | MF_UNCHECKED, ID_TOOLS_WORD_WARP, TEXT("Enable Word Warp"));
+            AppendMenu(hToolsMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY | MF_UNCHECKED, ID_TOOLS_SHOW_LINES, TEXT("Show Lines"));
 
             HMENU hAboutMenu = CreateMenu();
             AppendMenu(hAboutMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_HELP_REPO, TEXT("View Repository\tF1"));
@@ -333,6 +350,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 case ID_VIEW_ZOOM_RESET:
                 {
                     SendMessage(ghEdit, EM_SETZOOM, 0, 0);
+                    break;
+                }
+                case ID_TOOLS_WORD_WARP:
+                {
+                    g_bWordWarp = !g_bWordWarp;
+                    CheckMenuItem(GetSubMenu(GetMenu(hwnd), 3), ID_TOOLS_WORD_WARP, g_bWordWarp ? MF_CHECKED : MF_UNCHECKED);
+
+                    // wtf (lol)
+                    SendMessage(ghEdit, EM_SETTARGETDEVICE, (WPARAM)GetDC(ghEdit), g_bWordWarp ? 1 : 0);
                     break;
                 }
             }
