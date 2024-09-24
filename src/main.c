@@ -28,6 +28,31 @@ static HWND ghStatusBar;
 
 #pragma comment(linker, "/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
+LRESULT CALLBACK EditSubclassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwrefData)
+{
+    switch (uMsg)
+    {
+        case WM_MOUSEWHEEL:
+        {
+            if (GetKeyState(VK_CONTROL) & 0x8000)
+            {
+                int nDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+                if (nDelta > 0)
+                    SendMessage(ghWindow, WM_COMMAND, MAKEWPARAM(ID_VIEW_ZOOM_IN, 0), (LPARAM)hwnd);
+                else if (nDelta < 0)
+                    SendMessage(ghWindow, WM_COMMAND, MAKEWPARAM(ID_VIEW_ZOOM_OUT, 0), (LPARAM)hwnd);
+
+                return 0;
+            }
+
+            break;
+        }
+    }
+
+    return DefSubclassProc(hwnd, uMsg, wParam, lParam);
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -55,8 +80,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             AppendMenu(hFileMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_FILE_EXIT, TEXT("Exit\tAlt+F4"));
 
             HMENU hEditMenu = CreateMenu();
-            // TODO: Add edit menu
-
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_UNDO, TEXT("Undo\tCtrl+Z"));
+            AppendMenu(hEditMenu, MF_SEPARATOR, 0, NULL);
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_CUT, TEXT("Cut\tCtrl+X"));
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_COPY, TEXT("Copy\tCtrl+C"));
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_PASTE, TEXT("Paste\tCtrl+V"));
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_DELETE, TEXT("Delete\tDel"));
+            AppendMenu(hEditMenu, MF_SEPARATOR, 0, NULL);
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_GEMINI, TEXT("Summarize with Gemini...\tCtrl+E"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_FIND, TEXT("Find...\tCtrl+F"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_FIND_NEXT, TEXT("Find Next\tF3"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_FIND_PREV, TEXT("Find Previous\tShift+F3"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_REPLACE, TEXT("Replace...\tCtrl+H"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_GOTO, TEXT("Go To...\tCtrl+G"));
+            AppendMenu(hEditMenu, MF_SEPARATOR, 0, NULL);
+            AppendMenu(hEditMenu, MF_STRING | MF_ENABLED | MF_RIGHTJUSTIFY, ID_EDIT_SELECT_ALL, TEXT("Select All\tCtrl+A"));
+            AppendMenu(hEditMenu, MF_STRING | MF_DISABLED | MF_RIGHTJUSTIFY, ID_EDIT_TIMENDATE, TEXT("Time/Date\tF5"));
+            
             HMENU hFormatMenu = CreateMenu();
             AppendMenu(hFormatMenu, MF_STRING | MF_ENABLED, ID_FORMAT_FONT, TEXT("Font..."));
 
@@ -98,6 +138,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             if (ghEdit == NULL)
                 ShowLastError(L"Failed to create an EDIT control");
+
+            SetWindowSubclass(ghEdit, EditSubclassProc, 0, 0);
 
             ghStatusBar = CreateWindowExW(0, STATUSCLASSNAMEW, NULL,
                 WS_CHILD | WS_VISIBLE | SBARS_SIZEGRIP, 0, 0, 0, 0,
