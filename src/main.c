@@ -10,8 +10,6 @@
 #include <Uxtheme.h>
 #include <dwmapi.h>
 #include <CommCtrl.h>
-#include <dcomp.h>
-#include <d3d11.h>
 
 #include "exception.h"
 #include "dlgabout.h"
